@@ -208,3 +208,33 @@ module.exports.loginUser = async (req,res, next) => {
         next(error);
     }
 }
+
+module.exports.refreshLoginToken = async (req, res, next) => {
+    try {
+        const refreshToken = req.cookies.refreshToken;
+        const org_id = req.headers.org_id;
+
+        if(!refreshToken || !org_id) {
+            throw new Error("Refresh token and organization ID are required");
+        }
+
+        const tenant = await tenantAuth({org_id});
+
+        const result = await Functions.refreshToken(tenant.tenantId, refreshToken);
+
+        // Set Cookie
+        res.cookie("idToken", result.id_token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "strict",
+            expires: new Date(Date.now() + 1000 * 60 * 60) // 1 hour
+        });
+
+
+        res.status(200).json({
+            message: "Refresh token verified successfully"
+        });
+    } catch (error) {
+        next(error);
+    }
+}

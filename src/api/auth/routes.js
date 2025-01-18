@@ -17,4 +17,8 @@ router.post("/login", Controller.loginUser);
 // Get User
 router.get("/info", isAuthenticated(), Controller.getUser);
 
+
+// Refresh Login Token
+router.post("/refresh", Controller.refreshLoginToken);
+
 module.exports = router;
